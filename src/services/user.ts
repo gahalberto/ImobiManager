@@ -1,12 +1,17 @@
 import { AppDataSource } from "../data-source";
 import { User } from "../infrastructure/entity/User";
-import { z } from "zod";
-import { signupSchema } from "../schemas/singup";
 
 const userRepository = AppDataSource.getRepository(User);
 
+type UserProps = {
+  firstName: string;
+  lastname: string;
+  email: string;
+  password: string;
+};
+
 // Definir o schema do zod para validar o corpo da solicitação
-export const createUser = async (data: z.infer<typeof signupSchema>) => {
+export const createUser = async (data: UserProps) => {
   const user = new User();
   user.firstName = data.firstName;
   user.lastName = data.lastname;

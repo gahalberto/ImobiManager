@@ -29,7 +29,6 @@ export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
         return;
       }
 
-      req.email = user.email;
       next();
     }
   );

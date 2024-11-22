@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
 
 export const ping = (req: Request, res: Response) => {
-  res.send("pong");
+  res.status(200).send("pong");
 };
