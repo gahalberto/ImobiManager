@@ -1,4 +1,4 @@
-import express, { Application } from "express"; // Importando Application do express
+import express, { Application } from "express";
 import "reflect-metadata";
 import cors from "cors";
 import helmet from "helmet";
@@ -13,34 +13,39 @@ const options = {
 };
 
 // Tipo explicito de Application do Express
-const server: Application = express();
+const app: Application = express();
 
-server.use(helmet());
-server.use(cors());
-server.use(express.urlencoded({ extended: true }));
-server.use(express.json());
+app.use(helmet());
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Rotas da aplicação
-server.use(mainRouter);
+app.use(mainRouter);
 // Rota para documentação
-server.use(
+app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(swaggerDocument, options)
 );
 
-// Inicia o servidor
+// Função para iniciar o servidor e retornar a instância do servidor HTTP
 export const startServer = () => {
-  AppDataSource.initialize()
+  return AppDataSource.initialize()
     .then(() => {
       const port = process.env.PORT || 3000;
-      server.listen(port, () => {
+      const server = app.listen(port, () => {
         console.log(`✅ Servidor rodando na porta ${port} 🚀`);
       });
+      return server; // Retorna a instância do servidor HTTP
     })
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      console.error("Erro ao iniciar o servidor:", error);
+      process.exit(1); // Encerra o processo em caso de erro
+    });
 };
 
 startServer();
 
-export default server;
+// Exporta a função de startServer para iniciar o servidor em outro lugar
+export default app; // Exporta o app, caso precise usá-lo em outro lugar
