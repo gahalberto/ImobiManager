@@ -4,7 +4,7 @@ import { signinSchema } from "../schemas/signin";
 import { createJWT } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
-import { signin, signup } from "../controllers/auth";
+import { signin, signup } from "../controllers/authController";
 
 jest.mock("../services/user");
 jest.mock("../schemas/singup");

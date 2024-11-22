@@ -19,9 +19,7 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: false,
   entities: [User, Company, Property, Photos],
-  migrations: [
-    /*...*/
-  ],
+  migrations: ["src/infrastructure/migrations/**/*.ts"],
   migrationsTableName: "custom_migration_table",
   subscribers: [],
   ssl: true,
