@@ -6,7 +6,7 @@ export const uploudPhotos = async (
   files: Express.Multer.File[],
   newProperty: any
 ) => {
-  console.log("Saving photos...");
+  console.log("Salvando images...");
   const photos = files.map((file) => {
     const photo = new Photos();
     photo.filePath = file.path; // Caminho do arquivo
@@ -14,5 +14,5 @@ export const uploudPhotos = async (
     return photo;
   });
   await photoRepository.save(photos);
-  console.log("Photos saved successfully");
+  console.log("Fotos foram salvas com sucesso!");
 };
