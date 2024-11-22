@@ -2,8 +2,12 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "./infrastructure/entity/User";
 import dotenv from "dotenv";
+import { Company } from "./infrastructure/entity/Company";
+import { Property } from "./infrastructure/entity/Property";
+import { Photos } from "./infrastructure/entity/Photos";
 
 dotenv.config();
+console.log("DataSource configurado com sucesso!");
 
 export const AppDataSource = new DataSource({
   type: "postgres",
@@ -14,8 +18,11 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: true,
   logging: false,
-  entities: [User],
-  migrations: [],
+  entities: [User, Company, Property, Photos],
+  migrations: [
+    /*...*/
+  ],
+  migrationsTableName: "custom_migration_table",
   subscribers: [],
   ssl: true,
   extra: {
