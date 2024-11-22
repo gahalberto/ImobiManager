@@ -17,9 +17,9 @@ export const getAllCompanies = async () => {
 export const CreateCompany = async (name: string) => {
   const company = new Company();
   company.name = name;
-  await companyRepository.save(company);
+  const newCompany = await companyRepository.save(company);
 
-  return company;
+  return newCompany;
 };
 
 export const getCompaniesByIds = async (ids: number[]) => {

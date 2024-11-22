@@ -21,6 +21,14 @@ type PropsType = {
   companies: number[];
 };
 
+type FilterType = {
+  price_min?: number;
+  price_max?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  address_city?: string;
+};
+
 export const createProperty = async (data: PropsType) => {
   // Verifica se as construtoras existem
   const companies = await getCompaniesByIds(data.companies);
@@ -44,4 +52,48 @@ export const createProperty = async (data: PropsType) => {
 
   console.log("Returning property");
   return property;
+};
+
+export const getPropertiesByFilter = async (filter: FilterType) => {
+  console.log(filter);
+  // Criando a consulta com QueryBuilder
+  const queryBuilder = propertyRepository.createQueryBuilder("property");
+
+  // Filtro de preço
+  if (filter.price_min) {
+    queryBuilder.andWhere("property.price >= :price_min", {
+      price_min: filter.price_min,
+    });
+  }
+  if (filter.price_max) {
+    queryBuilder.andWhere("property.price <= :price_max", {
+      price_max: Number(filter.price_max),
+    });
+  }
+
+  // Filtro de número de quartos
+  if (filter.bedrooms) {
+    queryBuilder.andWhere("property.bedrooms = :bedrooms", {
+      bedrooms: filter.bedrooms,
+    });
+  }
+
+  // Filtro de número de banheiros
+  if (filter.bathrooms) {
+    queryBuilder.andWhere("property.bathrooms = :bathrooms", {
+      bathrooms: filter.bathrooms,
+    });
+  }
+
+  // Filtro de localização (cidade) - Usando ILIKE para buscar sem sensibilidade a maiúsculas/minúsculas
+  if (filter.address_city) {
+    console.log(filter.address_city);
+    queryBuilder.andWhere("property.address_city LIKE :address_city", {
+      address_city: `%${filter.address_city}%`,
+    });
+  }
+
+  // Executar a consulta
+  const properties = await queryBuilder.getMany();
+  return properties;
 };

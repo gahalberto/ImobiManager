@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import { propertySchema } from "../schemas/property";
-import { createProperty } from "../services/property";
+import { createProperty, getPropertiesByFilter } from "../services/property";
 import { uploudPhotos } from "../services/photo";
-import { AppDataSource } from "../data-source";
-import { Property } from "../infrastructure/entity/Property";
 
 // Controller para a rota de criação de propriedades
 export const Create = async (req: Request, res: Response): Promise<any> => {
@@ -47,50 +45,14 @@ export const filterProperties = async (
   res: Response
 ): Promise<any> => {
   const { price_min, price_max, bedrooms, bathrooms, address_city } = req.query;
-
   try {
-    const propertyRepository = AppDataSource.getRepository(Property);
-
-    // Criando a consulta com QueryBuilder
-    const queryBuilder = propertyRepository.createQueryBuilder("property");
-
-    // Filtro de preço
-    if (price_min) {
-      queryBuilder.andWhere("property.price >= :price_min", {
-        price_min: parseFloat(price_min as string),
-      });
-    }
-    if (price_max) {
-      queryBuilder.andWhere("property.price <= :price_max", {
-        price_max: parseFloat(price_max as string),
-      });
-    }
-
-    // Filtro de número de quartos
-    if (bedrooms) {
-      queryBuilder.andWhere("property.bedrooms = :bedrooms", {
-        bedrooms: parseInt(bedrooms as string),
-      });
-    }
-
-    // Filtro de número de banheiros
-    if (bathrooms) {
-      queryBuilder.andWhere("property.bathrooms = :bathrooms", {
-        bathrooms: parseInt(bathrooms as string),
-      });
-    }
-
-    // Filtro de localização (cidade) - Usando ILIKE para buscar sem sensibilidade a maiúsculas/minúsculas
-    if (address_city) {
-      console.log(address_city);
-      queryBuilder.andWhere("property.address_city LIKE :address_city", {
-        address_city: `%${address_city}%`,
-      });
-    }
-
-    // Executar a consulta
-    const properties = await queryBuilder.getMany();
-
+    const properties = await getPropertiesByFilter({
+      price_min: price_min ? parseInt(price_min as string) : undefined,
+      price_max: price_max ? parseFloat(price_max as string) : undefined,
+      bedrooms: bedrooms ? parseInt(bedrooms as string) : undefined,
+      bathrooms: bathrooms ? parseInt(bathrooms as string) : undefined,
+      address_city: address_city as string,
+    });
     // Retornar as propriedades filtradas
     return res.status(200).json(properties);
   } catch (error) {
