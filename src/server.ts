@@ -22,12 +22,6 @@ app.use(express.json());
 
 // Rotas da aplicação
 app.use(mainRouter);
-// Rota para documentação
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument, options)
-);
 
 // Função para iniciar o servidor e retornar a instância do servidor HTTP
 export const startServer = () => {
