@@ -20,7 +20,7 @@ app.use(mainRouter);
 export const startServer = () => {
   return AppDataSource.initialize()
     .then(() => {
-      const port = process.env.PORT || 3000;
+      const port = process.env.PORT || 3333;
       const server = app.listen(port, () => {
         console.log(`✅ Servidor rodando na porta ${port} 🚀`);
       });

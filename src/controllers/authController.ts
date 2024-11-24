@@ -68,7 +68,7 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
     // Verifica se o usuário existe pelo email
     const user = await findUserByEmail(safeData.data.email);
     if (!user) {
-      return res.status(400).json({ error: "Usuário não encontrado" });
+      return res.status(400).json({ error: "E-mail e/ou senha inválidos" });
     }
 
     // Compara a senha criptografada com a senha do usuário usando bcrypt
@@ -79,7 +79,7 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
 
     // Se a senha não bater, retorna erro de acesso negado e não senha invalida para não dar dica ao usuário
     if (!passwordMatch) {
-      return res.status(400).json({ error: "Acesso negado" });
+      return res.status(400).json({ error: "E-mail e/ou senha inválidos" });
     }
 
     // Cria o token JWT, retornando o token e alguns dados do usuário
