@@ -22,6 +22,7 @@ export const CreateCompany = async (name: string) => {
   return newCompany;
 };
 
+// Buscar construtoras pelos IDs
 export const getCompaniesByIds = async (ids: number[]) => {
   return await companyRepository.find({
     where: {

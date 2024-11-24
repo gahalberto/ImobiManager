@@ -50,12 +50,15 @@ export const Create = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+// Controller para a rota de filtragem de propriedades por query params
 export const filterProperties = async (
   req: Request,
   res: Response
 ): Promise<any> => {
+  // Recebe os query params da requisição
   const { price_min, price_max, bedrooms, bathrooms, address_city } = req.query;
   try {
+    // Filtra as propriedades pelo service getPropertiesByFilter
     const properties = await getPropertiesByFilter({
       price_min: price_min ? parseInt(price_min as string) : undefined,
       price_max: price_max ? parseFloat(price_max as string) : undefined,

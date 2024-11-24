@@ -65,6 +65,7 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
       price_min: filter.price_min,
     });
   }
+  // Filtro de preço máximo
   if (filter.price_max) {
     queryBuilder.andWhere("property.price <= :price_max", {
       price_max: Number(filter.price_max),
