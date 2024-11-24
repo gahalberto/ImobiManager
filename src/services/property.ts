@@ -4,7 +4,7 @@ import { photoRepository } from "../infrastructure/repository/photoRepository";
 import { propertyRepository } from "../infrastructure/repository/propertyRepository";
 import { getCompaniesByIds } from "./company";
 
-type PropsType = {
+type CreatePropertyPropsType = {
   title: string;
   address_zipcode: string;
   address_street: string;
@@ -21,6 +21,24 @@ type PropsType = {
   companies: number[];
 };
 
+type UpdatePropertyType = {
+  id: number;
+  title?: string;
+  address_zipcode?: string;
+  address_street?: string;
+  address_number?: number;
+  address_complement?: string;
+  address_neighborhood?: string;
+  address_city?: string;
+  address_state?: string;
+  price?: number;
+  description?: string;
+  images?: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  companies?: number[];
+};
+
 type FilterType = {
   price_min?: number;
   price_max?: number;
@@ -29,7 +47,7 @@ type FilterType = {
   address_city?: string;
 };
 
-export const createProperty = async (data: PropsType) => {
+export const createProperty = async (data: CreatePropertyPropsType) => {
   // Verifica se as construtoras existem
   const companies = await getCompaniesByIds(data.companies);
 
@@ -51,6 +69,58 @@ export const createProperty = async (data: PropsType) => {
   }
 
   console.log("Returning property");
+  return property;
+};
+
+export const updateProperty = async (data: UpdatePropertyType) => {
+  console.log(`ID da propriedade: ${data.id}`);
+  const property = await propertyRepository.findOne({
+    where: { id: data.id },
+    relations: ["companies"],
+  });
+
+  if (!property) {
+    return null;
+  }
+
+  // Atualizar os dados da propriedade
+  property.title = data.title || property.title;
+  property.address_zipcode = data.address_zipcode || property.address_zipcode;
+  property.address_street = data.address_street || property.address_street;
+  property.address_number = data.address_number || property.address_number;
+  property.address_complement =
+    data.address_complement || property.address_complement;
+  property.address_neighborhood =
+    data.address_neighborhood || property.address_neighborhood;
+  property.address_city = data.address_city || property.address_city;
+  property.address_state = data.address_state || property.address_state;
+  property.price = data.price || property.price;
+  property.description = data.description || property.description;
+  property.bedrooms = data.bedrooms || property.bedrooms;
+  property.bathrooms = data.bathrooms || property.bathrooms;
+  property.companies = data.companies
+    ? await getCompaniesByIds(data.companies)
+    : property.companies;
+
+  // Salvar a propriedade
+  await propertyRepository.save(property);
+  return property;
+};
+
+export const deleteProperty = async (id: number) => {
+  // Buscar a propriedade pelo ID
+  const property = await propertyRepository.findOne({
+    where: { id },
+    relations: ["companies"],
+  });
+
+  // Se não encontrar a propriedade, retornar null
+  if (!property) {
+    return null;
+  }
+
+  // Remover a propriedade
+  await propertyRepository.remove(property);
   return property;
 };
 

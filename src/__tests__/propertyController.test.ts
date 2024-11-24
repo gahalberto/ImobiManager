@@ -1,6 +1,16 @@
 import { Request, Response } from "express";
-import { createProperty, getPropertiesByFilter } from "../services/property";
-import { filterProperties, Create } from "../controllers/propertyController";
+import {
+  createProperty,
+  deleteProperty,
+  getPropertiesByFilter,
+  updateProperty,
+} from "../services/property";
+import {
+  filterProperties,
+  Create,
+  Update,
+  Remove,
+} from "../controllers/propertyController";
 
 jest.mock("./../services/property");
 
@@ -100,6 +110,87 @@ describe("Property Controller", () => {
       await Create(req as Request, res as Response);
 
       expect(res.json).toHaveBeenCalledWith({ id: 1, title: "New Property" });
+    });
+  });
+
+  describe("Update Property", () => {
+    it("should return 500 if validation fails", async () => {
+      const zodError = new Error("Validation failed");
+      (updateProperty as jest.Mock).mockRejectedValue(zodError);
+
+      req.params = { id: "1" };
+      req.body = { title: "" }; // Dados inválidos
+      await Update(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Erro ao atualizar um imóvel.",
+      });
+    });
+
+    it("should return 500 if updateProperty service fails", async () => {
+      (updateProperty as jest.Mock).mockRejectedValue(
+        new Error("Error updating property")
+      );
+
+      req.params = { id: "1" };
+      req.body = { title: "Updated Title" };
+      await Update(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Erro ao atualizar um imóvel.",
+      });
+    });
+
+    it("should return 200 and the updated property", async () => {
+      (updateProperty as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: "Updated Title",
+      });
+
+      req.params = { id: "1" };
+      req.body = { title: "Updated Title" };
+
+      await Update(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        id: 1,
+        title: "Updated Title",
+      });
+    });
+  });
+
+  describe("Remove Property", () => {
+    it("should return 500 if deleteProperty service fails", async () => {
+      (deleteProperty as jest.Mock).mockRejectedValue(
+        new Error("Error deleting property")
+      );
+
+      req.params = { id: "1" };
+      await Remove(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Erro ao remover um imóvel.",
+      });
+    });
+
+    it("should return 200 and the removed property", async () => {
+      (deleteProperty as jest.Mock).mockResolvedValue({
+        id: 1,
+        title: "Property to Remove",
+      });
+
+      req.params = { id: "1" };
+      await Remove(req as Request, res as Response);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        id: 1,
+        title: "Property to Remove",
+      });
     });
   });
 });

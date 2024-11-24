@@ -4,13 +4,6 @@ import cors from "cors";
 import helmet from "helmet";
 import mainRouter from "./routers/main";
 import { AppDataSource } from "./data-source";
-import swaggerUi from "swagger-ui-express";
-const swaggerDocument = require("../swagger.json");
-
-const options = {
-  explorer: true,
-  customCss: ".swagger-ui .topbar { display: none }",
-};
 
 // Tipo explicito de Application do Express
 const app: Application = express();

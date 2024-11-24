@@ -1,7 +1,13 @@
 import { Request, Response } from "express";
 import { propertySchema } from "../schemas/property";
-import { createProperty, getPropertiesByFilter } from "../services/property";
+import {
+  createProperty,
+  deleteProperty,
+  getPropertiesByFilter,
+  updateProperty,
+} from "../services/property";
 import { uploudPhotos } from "../services/photo";
+import { updatePropertySchema } from "../schemas/updateProperty";
 
 // Controller para a rota de criação de propriedades
 export const Create = async (req: Request, res: Response): Promise<any> => {
@@ -47,6 +53,53 @@ export const Create = async (req: Request, res: Response): Promise<any> => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: `Erro ao criar um imóvel.` });
+  }
+};
+
+export const Update = async (req: Request, res: Response): Promise<any> => {
+  // Recebe o id da propriedade a ser atualizada
+  const { id } = req.params;
+  console.log(id);
+  // Validação dos dados enviados pelo ZOD
+  const safeData = updatePropertySchema.safeParse(req.body);
+  if (!safeData.success) {
+    return res
+      .status(500)
+      .json({ error: "Error updating property", message: safeData.error });
+  }
+
+  // Tenta atualizar a propriedade pelo service updateProperty
+  try {
+    const updatedProperty = await updateProperty({
+      id: parseInt(id),
+      ...safeData.data,
+    });
+
+    if (!updatedProperty) {
+      return res.status(500).json({
+        error: "Erro ao atualizar um imóvel",
+        message: safeData.error,
+      });
+    }
+
+    res.status(200).json(updatedProperty);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: `Erro ao atualizar um imóvel.` });
+  }
+};
+
+export const Remove = async (req: Request, res: Response): Promise<any> => {
+  // Recebe o id da propriedade a ser removida
+  const { id } = req.params;
+
+  // Tenta remover a propriedade pelo service deleteProperty
+  try {
+    const removedProperty = await deleteProperty(parseInt(id));
+    res.status(200).json(removedProperty);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: `Erro ao remover um imóvel.` });
   }
 };
 
