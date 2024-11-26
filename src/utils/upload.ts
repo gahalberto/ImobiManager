@@ -1,5 +1,4 @@
 import multer, { StorageEngine } from "multer";
-import path from "path";
 import { Request } from "express";
 
 // Definindo o tipo para a callback do multer

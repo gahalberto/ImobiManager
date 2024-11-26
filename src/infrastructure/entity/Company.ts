@@ -2,8 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToMany,
   CreateDateColumn,
+  OneToMany,
 } from "typeorm";
 import { Property } from "./Property";
 
@@ -19,7 +19,6 @@ export class Company {
   @CreateDateColumn()
   createdAt!: Date;
 
-  // Atualize para ManyToMany, já que a relação é bidirecional
-  @ManyToMany(() => Property, (property) => property.companies)
+  @OneToMany(() => Property, (property) => property.company)
   properties!: Property[];
 }

@@ -1,4 +1,3 @@
-import { Express } from "express";
 import { Photos } from "../infrastructure/entity/Photos";
 import { photoRepository } from "../infrastructure/repository/photoRepository";
 

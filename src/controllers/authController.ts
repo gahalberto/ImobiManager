@@ -55,6 +55,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
 // Função de login
 export const signin = async (req: Request, res: Response): Promise<any> => {
+  console.log(`RECEBENDO TENTATIVA DE LOGIN...`);
+  console.log(`BODY: ${JSON.stringify(req.body)}`);
   try {
     // Validação do corpo da requisição com ZOD (signinSchema)
     const safeData = signinSchema.safeParse(req.body);
@@ -84,7 +86,10 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
 
     // Cria o token JWT, retornando o token e alguns dados do usuário
     const token = createJWT(user.email);
-    res.json({ token, user: { firstName: user.firstName, email: user.email } });
+    res.json({
+      token,
+      user: { id: user.id, firstName: user.firstName, email: user.email },
+    });
   } catch (error) {
     res.status(500).json({ error: "Aconteceu algum erro ao fazer login" });
   }

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const propertySchema = z.object({
   title: z.string(),
-  companies: z.array(z.number()),
+  company: z.number(),
   address_zipcode: z.string(),
   address_street: z.string(),
   address_number: z.string(),

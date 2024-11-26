@@ -5,6 +5,7 @@ import {
   OneToMany,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from "typeorm";
 import { Company } from "./Company";
 import { Photos } from "./Photos";
@@ -51,9 +52,8 @@ export class Property {
   @Column({ type: "int" })
   bathrooms!: number;
 
-  @ManyToMany(() => Company)
-  @JoinTable()
-  companies!: Company[];
+  @ManyToOne(() => Company, (company) => company.properties)
+  company!: Company;
 
   @OneToMany(() => Photos, (photos) => photos.property)
   photos!: Photos[];

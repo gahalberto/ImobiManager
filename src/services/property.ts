@@ -3,6 +3,7 @@ import { Photos } from "../infrastructure/entity/Photos";
 import { photoRepository } from "../infrastructure/repository/photoRepository";
 import { propertyRepository } from "../infrastructure/repository/propertyRepository";
 import { getCompaniesByIds } from "./company";
+import { companyRepository } from "../infrastructure/repository/companyRepository";
 
 type CreatePropertyPropsType = {
   title: string;
@@ -18,7 +19,7 @@ type CreatePropertyPropsType = {
   images?: string[];
   bedrooms: number;
   bathrooms: number;
-  companies: number[];
+  company: number;
 };
 
 type UpdatePropertyType = {
@@ -36,7 +37,7 @@ type UpdatePropertyType = {
   images?: string[];
   bedrooms?: number;
   bathrooms?: number;
-  companies?: number[];
+  company?: number;
 };
 
 type FilterType = {
@@ -48,10 +49,16 @@ type FilterType = {
 };
 
 export const createProperty = async (data: CreatePropertyPropsType) => {
-  // Verifica se as construtoras existem
-  const companies = await getCompaniesByIds(data.companies);
+  // Buscar a empresa correspondente ao ID fornecido
+  const company = await companyRepository.findOne({
+    where: { id: data.company },
+  });
 
-  const property = await propertyRepository.create({ ...data, companies });
+  if (!company) {
+    throw new Error(`Empresa com ID ${data.company} não encontrada.`);
+  }
+
+  const property = await propertyRepository.create({ ...data, company });
   await propertyRepository.save(property);
   console.log("Property saved successfully");
 
@@ -76,7 +83,7 @@ export const updateProperty = async (data: UpdatePropertyType) => {
   console.log(`ID da propriedade: ${data.id}`);
   const property = await propertyRepository.findOne({
     where: { id: data.id },
-    relations: ["companies"],
+    relations: ["company"],
   });
 
   if (!property) {
@@ -98,10 +105,16 @@ export const updateProperty = async (data: UpdatePropertyType) => {
   property.description = data.description || property.description;
   property.bedrooms = data.bedrooms || property.bedrooms;
   property.bathrooms = data.bathrooms || property.bathrooms;
-  property.companies = data.companies
-    ? await getCompaniesByIds(data.companies)
-    : property.companies;
-
+  if (data.company) {
+    const company = await companyRepository.findOne({
+      where: { id: data.company },
+    });
+    if (company) {
+      property.company = company; // Atribui a empresa encontrada
+    } else {
+      console.log(`Empresa com ID ${data.company} não encontrada.`);
+    }
+  }
   // Salvar a propriedade
   await propertyRepository.save(property);
   return property;
@@ -111,7 +124,7 @@ export const deleteProperty = async (id: number) => {
   // Buscar a propriedade pelo ID
   const property = await propertyRepository.findOne({
     where: { id },
-    relations: ["companies"],
+    relations: ["company"],
   });
 
   // Se não encontrar a propriedade, retornar null

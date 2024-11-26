@@ -20,7 +20,7 @@ export const AppDataSource = new DataSource({
   logging: false,
   entities: [User, Company, Property, Photos],
   migrations: ["src/infrastructure/migrations/**/*.ts"],
-  migrationsTableName: "custom_migration_table",
+  migrationsTableName: "1732279961954-UpdatingProperty",
   subscribers: [],
   ssl: true,
   extra: {

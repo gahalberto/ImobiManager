@@ -6,60 +6,69 @@ import {
   getPropertiesByFilter,
   updateProperty,
 } from "../services/property";
-import { uploudPhotos } from "../services/photo";
 import { updatePropertySchema } from "../schemas/updateProperty";
+import upload from "../utils/upload";
 
 // Controller para a rota de criação de propriedades
 export const Create = async (req: Request, res: Response): Promise<any> => {
-  // Validação dos dados enviados pelo ZOD
-  const safeData = propertySchema.safeParse(req.body);
-  if (!safeData.success) {
-    return res
-      .status(500)
-      .json({ error: "Error creating property", message: safeData.error });
-  }
-
   try {
-    // Cria a nova propriedade pelo service createProperty
+    console.log("Dados recebidos no body:", req.body);
+    console.log("Arquivos recebidos:", req.files);
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: "Nenhum dado foi recebido." });
+    }
+
+    if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
+      return res.status(400).json({ error: "Nenhum arquivo foi enviado." });
+    }
+
+    const safeData = propertySchema.safeParse({
+      ...req.body,
+      company: parseInt(req.body.company, 10),
+      price: parseFloat(req.body.price),
+      bedrooms: parseInt(req.body.bedrooms, 10),
+      bathrooms: parseInt(req.body.bathrooms, 10),
+      images: (req.files as Express.Multer.File[]).map((file) => file.path),
+    });
+
+    if (!safeData.success) {
+      console.error("Erro de validação:", safeData.error.errors);
+      return res.status(400).json({
+        error: "Erro de validação",
+        message: safeData.error.errors,
+      });
+    } // Cria a nova propriedade pelo service createProperty
     const newProperty = await createProperty({
       title: safeData.data.title,
       address_zipcode: safeData.data.address_zipcode,
       address_street: safeData.data.address_street,
-      address_number: parseInt(safeData.data.address_number),
+      address_number: parseInt(safeData.data.address_number, 10),
       address_complement: safeData.data.address_complement,
       address_neighborhood: safeData.data.address_neighborhood,
       address_city: safeData.data.address_city,
       address_state: safeData.data.address_state,
       price: safeData.data.price,
       description: safeData.data.description,
-      images: safeData.data.images,
+      images: req.files
+        ? (req.files as Express.Multer.File[]).map((file) => file.path)
+        : [], // Armazena os caminhos das imagens
       bedrooms: safeData.data.bedrooms,
       bathrooms: safeData.data.bathrooms,
-      companies: safeData.data.companies,
+      company: safeData.data.company,
     });
-
-    // Envia as imagens do imóvel para o service de uploud de imagens
-    if (req.files) {
-      await uploudPhotos(req.files as Express.Multer.File[], newProperty);
-    }
-    if (!newProperty) {
-      return res
-        .status(500)
-        .json({ error: "Erro ao criar um imóvel ", message: safeData.error });
-    }
 
     // Retorna a nova propriedade criada
     res.status(201).json(newProperty);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: `Erro ao criar um imóvel.` });
+    return res.status(500).json({ error: "Erro ao criar um imóvel." });
   }
 };
 
 export const Update = async (req: Request, res: Response): Promise<any> => {
   // Recebe o id da propriedade a ser atualizada
   const { id } = req.params;
-  console.log(id);
   // Validação dos dados enviados pelo ZOD
   const safeData = updatePropertySchema.safeParse(req.body);
   if (!safeData.success) {
