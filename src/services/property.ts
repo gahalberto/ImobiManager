@@ -124,7 +124,7 @@ export const deleteProperty = async (id: number) => {
   // Buscar a propriedade pelo ID
   const property = await propertyRepository.findOne({
     where: { id },
-    relations: ["company"],
+    relations: ["company", "photos"],
   });
 
   // Se não encontrar a propriedade, retornar null
@@ -139,6 +139,7 @@ export const deleteProperty = async (id: number) => {
 
 export const getPropertiesByFilter = async (filter: FilterType) => {
   console.log(filter);
+
   // Criando a consulta com QueryBuilder
   const queryBuilder = propertyRepository.createQueryBuilder("property");
 
@@ -148,6 +149,7 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
       price_min: filter.price_min,
     });
   }
+
   // Filtro de preço máximo
   if (filter.price_max) {
     queryBuilder.andWhere("property.price <= :price_max", {
@@ -169,7 +171,7 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
     });
   }
 
-  // Filtro de localização (cidade) - Usando ILIKE para buscar sem sensibilidade a maiúsculas/minúsculas
+  // Filtro de localização (cidade)
   if (filter.address_city) {
     console.log(filter.address_city);
     queryBuilder.andWhere("property.address_city LIKE :address_city", {
@@ -177,7 +179,22 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
     });
   }
 
+  // Incluir a relação de fotos
+  queryBuilder.leftJoinAndSelect("property.photos", "photos");
+
   // Executar a consulta
   const properties = await queryBuilder.getMany();
+
+  // Após a consulta, apenas uma foto por propriedade para a capa no frontend
+  // elas tenham o caminho correto para o frontend
+  properties.forEach((property) => {
+    if (property.photos && property.photos.length > 0) {
+      // Assumindo que você está armazenando as imagens localmente
+      property.photos.forEach((photo) => {
+        photo.filePath = `${photo.filePath}`;
+      });
+    }
+  });
+
   return properties;
 };
