@@ -40,7 +40,8 @@ export const Create = async (req: Request, res: Response): Promise<any> => {
         error: "Erro de validação",
         message: safeData.error.errors,
       });
-    } // Cria a nova propriedade pelo service createProperty
+    }
+
     const newProperty = await createProperty({
       title: safeData.data.title,
       address_zipcode: safeData.data.address_zipcode,
@@ -54,16 +55,17 @@ export const Create = async (req: Request, res: Response): Promise<any> => {
       description: safeData.data.description,
       images: req.files
         ? (req.files as Express.Multer.File[]).map((file) => file.path)
-        : [], // Armazena os caminhos das imagens
+        : [],
       bedrooms: safeData.data.bedrooms,
       bathrooms: safeData.data.bathrooms,
       company: safeData.data.company,
     });
 
-    // Retorna a nova propriedade criada
-    res.status(201).json(newProperty);
+    return res
+      .status(201)
+      .json({ message: "Imóvel criado com sucesso!", property: newProperty });
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao criar o imóvel:", error);
     return res.status(500).json({ error: "Erro ao criar um imóvel." });
   }
 };
