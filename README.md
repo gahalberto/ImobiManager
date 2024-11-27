@@ -5,7 +5,7 @@ Este projeto é um backend para gerenciar propriedades imobiliárias, incluindo 
 ## Principais Desafios 
 Maior desafio foi instalar o NEXT15 e pesquisar as mudanças e melhorias, também foi um desafio trabalhar com imagens, eu tive mais desafios com o backend quando fui fazer testes com JEST E SUPERTEST, eu nunca trabalhei com essas ferramentas e foi um desafio, após assistir vídeos dos meus cursos na rocketseat + YouTube + alura, consegui trabalhar bem os testes mas foi um aprendizado incrível
 
-Outro desafio foi trabalhar com TypeORM, pois ultimamente eu tenho escolhido o PrismaORM, trabalhar com type não foi difícil, me tirou umas horas de sono para relembrar tudo. Tive que ler a documentação do TypeORM e ver algumas aulas. 
+Outro desafio foi trabalhar com TypeORM, pois nos últimos anos quando trabalho com NEXTJS, eu tenho preferido o PrismaORM, trabalhar com type não foi difícil, me tirou umas horas de sono para relembrar tudo. Tive que ler a documentação do TypeORM e ver algumas aulas. 
 
 ## Índice
 
