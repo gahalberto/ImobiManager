@@ -48,6 +48,12 @@ type FilterType = {
   address_city?: string;
 };
 
+// Definindo o tipo para o retorno de getPropertiesByFilter
+type FilteredPropertiesResponse = {
+  properties: Property[]; // Lista das propriedades filtradas
+  totalProperties: number; // Total de propriedades filtradas
+};
+
 export const createProperty = async (data: CreatePropertyPropsType) => {
   // Buscar a empresa correspondente ao ID fornecido
   const company = await companyRepository.findOne({
@@ -137,7 +143,33 @@ export const deleteProperty = async (id: number) => {
   return property;
 };
 
-export const getPropertiesByFilter = async (filter: FilterType) => {
+export const getPropertyById = async (id: number) => {
+  // Buscar a propriedade pelo ID
+  const property = await propertyRepository.findOne({
+    where: { id },
+    relations: ["company", "photos"],
+  });
+
+  // Se não encontrar a propriedade, retornar null
+  if (!property) {
+    return null;
+  }
+
+  // Assumindo que você está armazenando as imagens localmente
+  if (property.photos && property.photos.length > 0) {
+    property.photos.forEach((photo) => {
+      photo.filePath = `${photo.filePath}`;
+    });
+  }
+
+  return property;
+};
+
+export const getPropertiesByFilter = async (
+  filter: FilterType,
+  page: number,
+  limit: number
+): Promise<FilteredPropertiesResponse> => {
   console.log(filter);
 
   // Criando a consulta com QueryBuilder
@@ -182,11 +214,16 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
   // Incluir a relação de fotos
   queryBuilder.leftJoinAndSelect("property.photos", "photos");
 
+  // Contagem total de propriedades com filtro
+  const totalProperties = await queryBuilder.getCount();
+
+  // Paginação
+  queryBuilder.skip((page - 1) * limit).take(limit);
+
   // Executar a consulta
   const properties = await queryBuilder.getMany();
 
   // Após a consulta, apenas uma foto por propriedade para a capa no frontend
-  // elas tenham o caminho correto para o frontend
   properties.forEach((property) => {
     if (property.photos && property.photos.length > 0) {
       // Assumindo que você está armazenando as imagens localmente
@@ -196,5 +233,10 @@ export const getPropertiesByFilter = async (filter: FilterType) => {
     }
   });
 
-  return properties;
+  return { properties, totalProperties };
+};
+
+export const getTotalPropertiesCount = async () => {
+  const totalProperties = await propertyRepository.count(); // Conta todas as propriedades na tabela
+  return totalProperties;
 };

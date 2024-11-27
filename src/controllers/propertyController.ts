@@ -4,6 +4,8 @@ import {
   createProperty,
   deleteProperty,
   getPropertiesByFilter,
+  getPropertyById,
+  getTotalPropertiesCount,
   updateProperty,
 } from "../services/property";
 import { updatePropertySchema } from "../schemas/updateProperty";
@@ -112,28 +114,67 @@ export const Remove = async (req: Request, res: Response): Promise<any> => {
   }
 };
 
+export const getProperty = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { id } = req.params;
+  const idNumber = parseInt(id, 10);
+  try {
+    const property = await getPropertyById(idNumber);
+    res.json(property);
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
 // Controller para a rota de filtragem de propriedades por query params
 export const filterProperties = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  // Recebe os query params da requisição
-  const { price_min, price_max, bedrooms, bathrooms, address_city } = req.query;
+  const {
+    price_min,
+    price_max,
+    bedrooms,
+    bathrooms,
+    address_city,
+    page,
+    limit,
+  } = req.query;
+
+  // Definir valores padrão para paginação, caso não sejam fornecidos
+  const pageNumber = page ? parseInt(page as string) : 1;
+  const pageLimit = limit ? parseInt(limit as string) : 9; // Defina o limite de 9 por página
+
   try {
-    // Filtra as propriedades pelo service getPropertiesByFilter
-    const properties = await getPropertiesByFilter({
-      price_min: price_min ? parseInt(price_min as string) : undefined,
-      price_max: price_max ? parseFloat(price_max as string) : undefined,
-      bedrooms: bedrooms ? parseInt(bedrooms as string) : undefined,
-      bathrooms: bathrooms ? parseInt(bathrooms as string) : undefined,
-      address_city: address_city as string,
+    // Filtra as propriedades pelo serviço getPropertiesByFilter, incluindo paginação
+    const { properties, totalProperties } = await getPropertiesByFilter(
+      {
+        price_min: price_min ? parseInt(price_min as string) : undefined,
+        price_max: price_max ? parseFloat(price_max as string) : undefined,
+        bedrooms: bedrooms ? parseInt(bedrooms as string) : undefined,
+        bathrooms: bathrooms ? parseInt(bathrooms as string) : undefined,
+        address_city: address_city as string,
+      },
+      pageNumber,
+      pageLimit
+    );
+
+    const totalPages = Math.ceil(totalProperties / parseInt(limit as string));
+
+    return res.status(200).json({
+      properties,
+      totalProperties,
+      totalPages,
+      currentPage: parseInt(page as string),
     });
-    // Retornar as propriedades filtradas
-    return res.status(200).json(properties);
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ error: "Erro ao filtrar propriedades", message: error });
+    return res.status(500).json({
+      error: "Erro ao filtrar propriedades",
+      message: error,
+    });
   }
 };

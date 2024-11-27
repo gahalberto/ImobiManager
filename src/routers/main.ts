@@ -18,6 +18,7 @@ router.post("/signin", signin);
 
 // Rotas CRUD de Propriedades - VerifyJWT é um middleware que verifica se o token é válido
 router.get("/properties", PropertyController.filterProperties);
+router.get("/properties/:id", PropertyController.getProperty);
 router.post(
   "/properties",
   verifyJWT,
