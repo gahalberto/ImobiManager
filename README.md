@@ -2,6 +2,11 @@
 
 Este projeto é um backend para gerenciar propriedades imobiliárias, incluindo autenticação de usuários, cadastro de imóveis, construtoras, e filtragem de propriedades. O sistema facilita o CRUD completo para propriedades e empresas, sendo ideal para imobiliárias que precisam gerenciar seus anúncios e usuários de forma centralizada.
 
+## Principais Desafios \
+Maior desafio foi instalar o NEXT15 e pesquisar as mudanças e melhorias, também foi um desafio trabalhar com imagens, eu tive mais desafios com o backend quando fui fazer testes com JEST E SUPERTEST, eu nunca trabalhei com essas ferramentas e foi um desafio, após assistir vídeos dos meus cursos na rocketseat + YouTube + alura, consegui trabalhar bem os testes mas foi um aprendizado incrível
+
+
+
 ## Índice
 
 - [Visão Geral](#visão-geral)
