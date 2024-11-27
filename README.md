@@ -69,6 +69,11 @@ JWT_SECRET=sua_chave_secreta
 
 ## Rotas da API
 
+### Middlewere
+
+- Rotas de POST, PUT e DELETE tem um middlewere para verificar se a requisição é de um usuário autenticado!
+
+
 ### Autenticação
 
 - `POST /signup` - Cadastro de novo usuário.
