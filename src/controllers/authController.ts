@@ -70,7 +70,7 @@ export const signin = async (req: Request, res: Response): Promise<any> => {
     // Verifica se o usuário existe pelo email
     const user = await findUserByEmail(safeData.data.email);
     if (!user) {
-      return res.status(400).json({ error: "E-mail e/ou senha inválidos" });
+      return res.status(400).json({ error: "Usuário não encontrado" });
     }
 
     // Compara a senha criptografada com a senha do usuário usando bcrypt

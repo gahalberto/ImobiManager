@@ -17,6 +17,8 @@ jest.mock("./../services/property");
 const req = {
   query: {},
   body: {},
+  params: {},
+  files: [],
 } as Partial<Request>;
 
 const res = {
@@ -32,10 +34,13 @@ describe("Property Controller", () => {
 
   describe("filterProperties", () => {
     it("should return 200 with filtered properties", async () => {
-      (getPropertiesByFilter as jest.Mock).mockResolvedValue([
-        { id: 1, title: "Property A" },
-        { id: 2, title: "Property B" },
-      ]);
+      (getPropertiesByFilter as jest.Mock).mockResolvedValue({
+        properties: [
+          { id: 1, title: "Property A" },
+          { id: 2, title: "Property B" },
+        ],
+        totalProperties: 2,
+      });
 
       req.query = {
         price_min: "1000",
@@ -43,30 +48,35 @@ describe("Property Controller", () => {
         bedrooms: "3",
         bathrooms: "2",
         address_city: "City",
+        page: "1",
+        limit: "1",
       };
 
       await filterProperties(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(200);
-      expect(jsonMock).toHaveBeenCalledWith([
-        { id: 1, title: "Property A" },
-        { id: 2, title: "Property B" },
-      ]);
+      expect(jsonMock).toHaveBeenCalledWith({
+        properties: [
+          { id: 1, title: "Property A" },
+          { id: 2, title: "Property B" },
+        ],
+        totalProperties: 2,
+        totalPages: 2,
+        currentPage: 1,
+      });
     });
   });
 
   describe("CreateProperty", () => {
-    it("should return 500 if validation fails", async () => {
-      // Mock de validação ZodError para falha de validação
-      const zodError = new Error("Validation failed");
+    it("should return 400 if validation fails", async () => {
+      const zodError = new Error("Nenhum arquivo foi enviado.");
       (createProperty as jest.Mock).mockRejectedValue(zodError);
 
       req.body = { title: "" }; // Dados inválidos
       await Create(req as Request, res as Response);
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: "Error creating property",
-        message: expect.any(Error),
+        error: "Nenhum arquivo foi enviado.",
       });
     });
 
@@ -77,10 +87,9 @@ describe("Property Controller", () => {
 
       req.body = { title: "New Property" };
       await Create(req as Request, res as Response);
-      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        error: "Error creating property",
-        message: expect.any(Error),
+        error: "Nenhum arquivo foi enviado.",
       });
     });
 
@@ -104,17 +113,28 @@ describe("Property Controller", () => {
           "Apartamento de alto padrão, localizado no centro da cidade, com vista panorâmica e infraestrutura completa.",
         bedrooms: 3,
         bathrooms: 2,
-        companies: [1, 2],
+        company: 1,
       };
+      req.files = [
+        {
+          path: "uploads/fake-image.jpg",
+          filename: "fake-image.jpg",
+          mimetype: "image/jpeg",
+        } as Express.Multer.File,
+      ];
 
       await Create(req as Request, res as Response);
 
-      expect(res.json).toHaveBeenCalledWith({ id: 1, title: "New Property" });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Imóvel criado com sucesso!",
+        property: { id: 1, title: "New Property" },
+      });
     });
   });
 
   describe("Update Property", () => {
-    it("should return 500 if validation fails", async () => {
+    it("should return 400 if validation fails", async () => {
       const zodError = new Error("Validation failed");
       (updateProperty as jest.Mock).mockRejectedValue(zodError);
 
@@ -130,7 +150,7 @@ describe("Property Controller", () => {
 
     it("should return 500 if updateProperty service fails", async () => {
       (updateProperty as jest.Mock).mockRejectedValue(
-        new Error("Error updating property")
+        new Error("Erro ao atualizar um imóvel.")
       );
 
       req.params = { id: "1" };
@@ -165,7 +185,7 @@ describe("Property Controller", () => {
   describe("Remove Property", () => {
     it("should return 500 if deleteProperty service fails", async () => {
       (deleteProperty as jest.Mock).mockRejectedValue(
-        new Error("Error deleting property")
+        new Error("Erro ao remover um imóvel.")
       );
 
       req.params = { id: "1" };

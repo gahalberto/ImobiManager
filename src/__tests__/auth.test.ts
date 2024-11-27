@@ -122,7 +122,9 @@ describe("Auth Controller", () => {
       await signin(req as Request, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({ error: "Acesso negado" });
+      expect(jsonMock).toHaveBeenCalledWith({
+        error: "E-mail e/ou senha inválidos",
+      });
     });
 
     it("should return token if signin is successful", async () => {
